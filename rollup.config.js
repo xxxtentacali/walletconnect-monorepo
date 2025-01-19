@@ -10,7 +10,7 @@ export default function createConfig(
       input,
       plugins,
       output: {
-        file: "./public/index.umd.js", // مسیر تغییر کرد به public
+        file: "/public/index.umd.js", // تغییر به /public
         format: "umd",
         exports: "named",
         name: packageName,
@@ -24,7 +24,7 @@ export default function createConfig(
       external: packageDependencies,
       output: [
         {
-          file: "./public/index.cjs.js", // مسیر تغییر کرد به public
+          file: "/public/index.cjs.js", // تغییر به /public
           format: "cjs",
           exports: "named",
           name: packageName,
@@ -32,7 +32,7 @@ export default function createConfig(
           ...cjs,
         },
         {
-          file: "./public/index.es.js", // مسیر تغییر کرد به public
+          file: "/public/index.es.js", // تغییر به /public
           format: "es",
           exports: "named",
           name: packageName,
