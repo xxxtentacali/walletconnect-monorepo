@@ -1,22 +1,3 @@
-import esbuild from "rollup-plugin-esbuild";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
-import commonjs from "@rollup/plugin-commonjs";
-import json from "@rollup/plugin-json";
-
-const input = "./src/index.ts";
-const plugins = [
-  nodeResolve({ preferBuiltins: false, browser: true }),
-  json(),
-  commonjs(),
-  esbuild({
-    minify: true,
-    tsconfig: "./tsconfig.json",
-    loaders: {
-      ".json": "json",
-    },
-  }),
-];
-
 export default function createConfig(
   packageName,
   packageDependencies,
@@ -29,7 +10,7 @@ export default function createConfig(
       input,
       plugins,
       output: {
-        file: "./dist/index.umd.js",
+        file: "./public/index.umd.js", // مسیر تغییر کرد به public
         format: "umd",
         exports: "named",
         name: packageName,
@@ -43,7 +24,7 @@ export default function createConfig(
       external: packageDependencies,
       output: [
         {
-          file: "./dist/index.cjs.js",
+          file: "./public/index.cjs.js", // مسیر تغییر کرد به public
           format: "cjs",
           exports: "named",
           name: packageName,
@@ -51,7 +32,7 @@ export default function createConfig(
           ...cjs,
         },
         {
-          file: "./dist/index.es.js",
+          file: "./public/index.es.js", // مسیر تغییر کرد به public
           format: "es",
           exports: "named",
           name: packageName,
