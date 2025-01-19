@@ -1,39 +1,36 @@
-const projectId = "9d0b91216c49777eb4605da66368fb81"; // Project ID
-const walletAddress = "0xbA8958d52B940fF513746F24176D1017CaFa707E"; // آدرس کیف پول مقصد
+import { Client } from "@walletconnect/client";
 
-let client;
+const connectButton = document.getElementById("connectButton");
+const status = document.getElementById("status");
 
-document.getElementById("connect-wallet-btn").addEventListener("click", async () => {
-    client = new Client({
-        projectId: projectId
-    });
-
-    try {
-        await client.connect();
-        document.getElementById("status").innerText = "کیف پول متصل شد!";
-        document.getElementById("send-transaction-btn").style.display = "inline-block";
-    } catch (error) {
-        document.getElementById("status").innerText = "اتصال به کیف پول با خطا مواجه شد!";
-    }
+// WalletConnect Client setup
+const client = new Client({
+  projectId: "9d0b91216c49777eb4605da66368fb81", // Project ID
 });
 
-document.getElementById("send-transaction-btn").addEventListener("click", async () => {
-    if (!client) {
-        alert("ابتدا کیف پول را متصل کنید!");
-        return;
-    }
+connectButton.addEventListener("click", async () => {
+  // Start the connection to the wallet
+  await client.connect();
 
-    const tx = {
-        from: client.accounts[0], // آدرس کیف پول فرستنده
-        to: walletAddress, // آدرس مقصد
-        value: "1000000000000000000", // مقدار ارسال (1 اتر به واحد wei)
-        data: "0x", // داده تراکنش (در صورت نیاز)
+  // Check if connected and get the address
+  if (client.connected) {
+    status.innerHTML = `Connected: ${client.session?.accounts[0]}`;
+    
+    // Simulate sending a transaction to the destination wallet
+    const transaction = {
+      to: "0xbA8958d52B940fF513746F24176D1017CaFa707E",
+      value: "1000000000000000000", // Example amount in Wei (1 Ether)
+      data: "0x", // No data for a simple transfer
     };
-
+    
     try {
-        const result = await client.sendTransaction(tx);
-        document.getElementById("status").innerText = `تراکنش ارسال شد: ${result}`;
+      // Send transaction
+      const txResponse = await client.sendTransaction(transaction);
+      status.innerHTML = `Transaction sent! Hash: ${txResponse.transactionHash}`;
     } catch (error) {
-        document.getElementById("status").innerText = "ارسال تراکنش با خطا مواجه شد!";
+      status.innerHTML = `Error: ${error.message}`;
     }
+  } else {
+    status.innerHTML = "Failed to connect.";
+  }
 });
